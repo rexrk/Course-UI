@@ -1,0 +1,130 @@
+/* Global styles */
+body {
+  text-align: center;
+  color: gray;
+}
+
+.container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Form container layout */
+.form-container {
+  display: flex;
+  justify-content: space-between;
+  width: 80%;
+}
+
+.form-left,
+.form-right {
+  flex: 1;
+  margin: 0 102px;
+  align-items: center;
+  padding: 20px;
+}
+
+.form-left form,
+.form-right form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Input fields and buttons */
+form input {
+  margin-bottom: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.but {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 0.875rem;
+  margin-bottom: 10px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Divider line */
+.vertical-line {
+  width: 2px;
+  background-color: #ddd;
+  height: auto;
+  margin: 0 20px;
+}
+
+hr.divider-line {
+  width: 80%;
+  border: 1px solid #ddd;
+  margin: 20px 0;
+}
+
+/* Tables */
+.table-container {
+  margin-top: 30px;
+  width: 80%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+table,
+th,
+td {
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+}
+
+td {
+  padding: 10px;
+  text-align: center;
+}
+
+/* Buttons for listing courses and instances */
+.list-courses-btn,
+.list-instances-btn {
+  margin: 20px 0;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Instance input fields and layout */
+.list-instances-container {
+  display: flex;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.list-instances-container input,
+.list-instances-container select {
+  margin-right: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
