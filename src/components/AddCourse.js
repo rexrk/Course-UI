@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./CourseUI.css";
+import { useNavigate } from "react-router-dom";
 
 function AddCourse() {
   const [courses, setCourses] = useState([]);
-  const [courseDelivery, setCourseDelivery] = useState([]);
+  const [coursesDelivery, setCoursesDelivery] = useState([]);
 
   const [courseTitle, setCourseTitle] = useState("");
   const [courseCode, setCourseCode] = useState("");
@@ -58,7 +59,6 @@ function AddCourse() {
       console.error("Error adding course:", error);
     }
   };
-  
 
   const handleAddDelivery = async () => {
     if (!selectedCourse || !deliveryYear || !semester) {
@@ -74,7 +74,6 @@ function AddCourse() {
       }
     };
   
-  
     try {
       const response = await fetch("http://localhost:8080/api/instances", {
         method: "POST",
@@ -85,7 +84,7 @@ function AddCourse() {
       });
   
       if (response.ok) {
-        alert("Course delivery added successfully!");
+        alert("Course delivery added!");
         setDeliveryYear("");
         setSemester("");
       } else {
@@ -93,15 +92,81 @@ function AddCourse() {
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while adding the course delivery.");
+      alert("An error occurred.");
     }
   };
 
-  const handleDeleteCourse = async (id) => {};
+  const handleDeleteCourse = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/courses/${id}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.ok) {
+        refreshCourses();
+      } else {
+        alert('Failed to delete course');
+      }
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      alert('An error occurred');
+    }
+  };
 
-  const handleListcourseDelivery = async () => {};
+  const handleListcourseDelivery = async () => {
+    if (!deliveryYear || !semester) {
+      alert("Please enter values.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(`http://localhost:8080/api/instances/${deliveryYear}/${semester}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setCoursesDelivery(data);
+        const enrichedData = data.map(courseDelivery => ({
+          ...courseDelivery,
+          deliveryYear: deliveryYear,
+          semester: semester 
+        }));
+  
+        setCoursesDelivery(enrichedData);
+      } else {
+        alert("Failed to fetch.");
+      }
+    } catch (error) {
+      console.error("Error in fetching:", error);
+    }
+  };
+  
 
-  const handleDeleteInstance = async (year, semester, id) => {};
+  const handleDeleteInstance = async (deliveryYear, semester, id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/instances/${deliveryYear}/${semester}/${id}`, {
+        method: "DELETE",
+      });
+  
+      if (response.ok) {
+        alert("Instance deleted.");
+      } else {
+        alert("Failed to delete.");
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
+      alert("An error occurred.");
+    }
+  };
+  
+  const navigate = useNavigate();
+
+  const handleSearchCourse = (id) => {
+    navigate(`/course/${id}`);
+  };
+
+  const handleSearchInstance = (id, deliveryYear, semester) => {
+    navigate(`/instance/${id}/${deliveryYear}/${semester}`);
+  };
 
   return (
     <div className="container">
@@ -171,7 +236,6 @@ function AddCourse() {
             </button>
           </form>
 
-
         </div>
       </div>
 
@@ -180,7 +244,6 @@ function AddCourse() {
       <button className="list-courses-btn" onClick={refreshCourses}>
         List Courses
       </button>
-
       <div className="table-container">
         <table>
           <thead>
@@ -196,7 +259,7 @@ function AddCourse() {
                 <td>{course.courseTitle}</td>
                 <td>{course.courseCode}</td>
                 <td>
-                  <button>Edit</button>
+                  <button onClick={() => handleSearchCourse(course.id)}>Search</button>
                   <button onClick={() => handleDeleteCourse(course.id)}>
                     Delete
                   </button>
@@ -233,32 +296,28 @@ function AddCourse() {
             <tr>
               <th>Course Title</th>
               <th>Year-Semester</th>
+              <th>Course Code</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {/* {courseDelivery.map((instance) => (
+            {coursesDelivery.map((instance) => (
               <tr key={instance.id}>
-                <td>{instance.course.courseTitle}</td>
+                <td>{instance.courseTitle}</td>
                 <td>
                   {instance.deliveryYear}-{instance.semester}
                 </td>
+                <td>{instance.courseCode}</td>
                 <td>
-                  <button>Edit</button>
+                  <button onClick={() => handleSearchInstance(instance.id, instance.deliveryYear, instance.semester)}>Search</button>
                   <button
-                    onClick={() =>
-                      handleDeleteInstance(
-                        instance.deliveryYear,
-                        instance.semester,
-                        instance.id
-                      )
-                    }
+                    onClick={() =>handleDeleteInstance(instance.id, instance.deliveryYear, instance.semester)}
                   >
                     Delete
                   </button>
                 </td>
               </tr>
-            ))} */}
+            ))}
           </tbody>
         </table>
       </div>
