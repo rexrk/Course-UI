@@ -1,131 +1,107 @@
 import React, { useState, useEffect } from "react";
-import './CourseUI.css';
+import "./CourseUI.css";
 
 function AddCourse() {
+  const [courses, setCourses] = useState([]);
+  const [courseDelivery, setCourseDelivery] = useState([]);
+
   const [courseTitle, setCourseTitle] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
+
   const [selectedCourse, setSelectedCourse] = useState("");
   const [deliveryYear, setDeliveryYear] = useState("");
   const [semester, setSemester] = useState("");
-  const [courses, setCourses] = useState([]);
-  const [instances, setInstances] = useState([]);
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/api/courses');
-        const data = await response.json();
+  useEffect(() => refreshCourses(), []);
+
+  function refreshCourses() {
+    fetch("http://localhost:8080/api/courses")
+      .then(response => response.json())
+      .then(data => {
         setCourses(data);
-      } catch (error) {
-        console.error('Error fetching courses:', error);
-      }
-    };
-    fetchCourses();
-  }, []);
-
-const handleAddCourse = async (e) => {
-  e.preventDefault();
-  const newCourse = { courseTitle, courseCode, courseDescription };
-
-  try {
-    const response = await fetch('http://localhost:8080/api/courses', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newCourse)
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      setCourses([...courses, data]);
-      setCourseTitle("");
-      setCourseCode("");
-      setCourseDescription("");
-      alert("Course added");
-    } else {
-      const errorMessage = await response.text();
-      alert(`Error: ${errorMessage}`);
-    }
-  } catch (error) {
-    console.error('Error adding course:', error);
-    alert("An error occurred while adding the course.");
+        console.log(data)
+      })
+      .catch(error => {
+        console.error("Error fetching courses:", error);
+      });
   }
-};
 
+  const handleAddCourse = async (e) => {
+    e.preventDefault();
+  
+    const newCourse = {
+      courseTitle,
+      courseCode,
+      courseDescription
+    };
+  
+    try {
+      const response = await fetch("http://localhost:8080/api/courses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newCourse)
+      });
+  
+      if (response.ok) {
+        alert("Content added")
+        setCourseTitle("");
+        setCourseCode("");
+        setCourseDescription("");
+        refreshCourses();
+      } else {
+        console.error("Failed to add course");
+      }
+    } catch (error) {
+      console.error("Error adding course:", error);
+    }
+  };
+  
 
   const handleAddDelivery = async () => {
     if (!selectedCourse || !deliveryYear || !semester) {
-      alert("Please fill out all fields.");
+      alert("Please fill all fields.");
       return;
     }
-
-    const newDelivery = { 
-      course: { id: selectedCourse }, 
-      deliveryYear, 
-      semester 
+  
+    const deliveryData = {
+      deliveryYear: deliveryYear,
+      semester: semester,
+      course: {
+        id: selectedCourse
+      }
     };
-
+  
+  
     try {
-      const response = await fetch('http://localhost:8080/api/instances', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/api/instances", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(newDelivery)
+        body: JSON.stringify(deliveryData)
       });
-      const data = await response.json();
-      setInstances([...instances, data]);
-      setDeliveryYear("");
-      setSemester("");
-      alert("Course delivery added");
+  
+      if (response.ok) {
+        alert("Course delivery added successfully!");
+        setDeliveryYear("");
+        setSemester("");
+      } else {
+        alert("Failed to add course delivery.");
+      }
     } catch (error) {
-      console.error('Error adding delivery:', error);
+      console.error("Error:", error);
+      alert("An error occurred while adding the course delivery.");
     }
   };
 
-  const handleListCourses = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/courses');
-      const data = await response.json();
-      setCourses(data);
-    } catch (error) {
-      console.error('Error listing courses:', error);
-    }
-  };
+  const handleDeleteCourse = async (id) => {};
 
-  const handleDeleteCourse = async (id) => {
-    try {
-      await fetch(`http://localhost:8080/api/courses/${id}`, {
-        method: 'DELETE'
-      });
-      handleListCourses();
-    } catch (error) {
-      console.error('Error deleting course:', error);
-    }
-  };
+  const handleListcourseDelivery = async () => {};
 
-  const handleListInstances = async () => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/instances/${deliveryYear}/${semester}`);
-      const data = await response.json();
-      setInstances(data);
-    } catch (error) {
-      console.error('Error listing instances:', error);
-    }
-  };
-
-  const handleDeleteInstance = async (year, semester, id) => {
-    try {
-      await fetch(`http://localhost:8080/api/instances/${year}/${semester}/${id}`, {
-        method: 'DELETE'
-      });
-      setInstances(instances.filter(instance => instance.id !== id));
-    } catch (error) {
-      console.error('Error deleting instance:', error);
-    }
-  };
+  const handleDeleteInstance = async (year, semester, id) => {};
 
   return (
     <div className="container">
@@ -158,7 +134,9 @@ const handleAddCourse = async (e) => {
         <div className="vertical-line"></div>
 
         <div className="form-right">
+
           <h2>Course Delivery</h2>
+
           <form>
             <div className="form-group">
               <select
@@ -172,7 +150,9 @@ const handleAddCourse = async (e) => {
                   </option>
                 ))}
               </select>
-              <button className="but" type="button" onClick={handleListCourses}>Refresh</button>
+              <button className="but" type="button" onClick={refreshCourses}>
+                Refresh
+              </button>
             </div>
             <input
               type="text"
@@ -186,14 +166,18 @@ const handleAddCourse = async (e) => {
               value={semester}
               onChange={(e) => setSemester(e.target.value)}
             />
-            <button type="button" onClick={handleAddDelivery}>Add Delivery</button>
+            <button type="button" onClick={handleAddDelivery}>
+              Add Delivery
+            </button>
           </form>
+
+
         </div>
       </div>
 
       <hr className="divider-line" />
 
-      <button className="list-courses-btn" onClick={handleListCourses}>
+      <button className="list-courses-btn" onClick={refreshCourses}>
         List Courses
       </button>
 
@@ -213,7 +197,9 @@ const handleAddCourse = async (e) => {
                 <td>{course.courseCode}</td>
                 <td>
                   <button>Edit</button>
-                  <button onClick={() => handleDeleteCourse(course.id)}>Delete</button>
+                  <button onClick={() => handleDeleteCourse(course.id)}>
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
@@ -223,7 +209,7 @@ const handleAddCourse = async (e) => {
 
       <hr className="divider-line" />
 
-      <div className="list-instances-container">
+      <div className="list-courseDelivery-container">
         <input
           type="text"
           placeholder="Delivery Year"
@@ -236,8 +222,8 @@ const handleAddCourse = async (e) => {
           value={semester}
           onChange={(e) => setSemester(e.target.value)}
         />
-        <button className="list-instances-btn" onClick={handleListInstances}>
-          List Instances
+        <button className="list-courseDelivery-btn" onClick={handleListcourseDelivery}>
+          List courseDelivery
         </button>
       </div>
 
@@ -251,16 +237,28 @@ const handleAddCourse = async (e) => {
             </tr>
           </thead>
           <tbody>
-            {instances.map((instance) => (
+            {/* {courseDelivery.map((instance) => (
               <tr key={instance.id}>
                 <td>{instance.course.courseTitle}</td>
-                <td>{instance.deliveryYear}-{instance.semester}</td>
+                <td>
+                  {instance.deliveryYear}-{instance.semester}
+                </td>
                 <td>
                   <button>Edit</button>
-                  <button onClick={() => handleDeleteInstance(instance.deliveryYear, instance.semester, instance.id)}>Delete</button>
+                  <button
+                    onClick={() =>
+                      handleDeleteInstance(
+                        instance.deliveryYear,
+                        instance.semester,
+                        instance.id
+                      )
+                    }
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
-            ))}
+            ))} */}
           </tbody>
         </table>
       </div>
